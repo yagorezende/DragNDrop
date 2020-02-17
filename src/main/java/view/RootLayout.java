@@ -147,6 +147,14 @@ public class RootLayout extends AnchorPane {
                         );
                     }
                 }
+
+                //AddLink drag operation
+                container = (DragContainer) event.getDragboard().getContent(DragContainer.AddLink);
+
+                if (container != null) {
+                    System.out.println(container.getData());
+                }
+
                 event.consume();
             }
         });

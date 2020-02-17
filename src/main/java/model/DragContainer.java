@@ -17,7 +17,9 @@ public class DragContainer implements Serializable{
 
     public static final DataFormat AddNode = new DataFormat("controller.DragIcon.add");
 
-    public static final DataFormat DragNode = new DataFormat("application.DraggableNode.drag");
+    public static final DataFormat DragNode = new DataFormat("controller.DraggableNode.drag");
+
+    public static final DataFormat AddLink = new DataFormat("controller.NodeLink.add");
 
     public DragContainer(){}
 
