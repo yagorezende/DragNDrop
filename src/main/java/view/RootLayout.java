@@ -1,6 +1,7 @@
 package view;
 
 import controller.DragIcon;
+import controller.DraggableNode;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -135,12 +136,15 @@ public class RootLayout extends AnchorPane {
 
                 if (container != null) {
                     if (container.getValue("scene_coords") != null) {
-                        DragIcon droppedIcon = new DragIcon();
+                        DraggableNode node = new DraggableNode();
 
-                        droppedIcon.setType(DragIconType.valueOf(container.getValue("type")));
-                        right_pane.getChildren().add(droppedIcon);
+                        node.setType(DragIconType.valueOf(container.getValue("type")));
+                        right_pane.getChildren().add(node);
                         Point2D cursorPoint = container.getValue("scene_coords");
-                        droppedIcon.relocateToPoint(new Point2D(cursorPoint.getX() - 32, cursorPoint.getY() - 32)                        );
+                            node.relocateToPoint(
+                                new Point2D(cursorPoint.getX() - 32, cursorPoint.getY() - 32
+                            )
+                        );
                     }
                 }
                 event.consume();
