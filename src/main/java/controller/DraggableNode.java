@@ -1,18 +1,38 @@
 package controller;
 
 import java.io.IOException;
+
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
+import javafx.scene.control.Label;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
+import model.DragContainer;
 import model.DragIconType;
 
 public class DraggableNode extends AnchorPane{
     @FXML AnchorPane root_pane;
+    @FXML private Label tittle_bar;
+    @FXML private Label close_button;
+
+    private EventHandler mContextDragOver;
+    private EventHandler mContextDragDropped;
 
     private DragIconType mType = null;
 
+    private Point2D mDragOffset = new Point2D(0.0, 0.0);
+
+    private final DraggableNode self;
+
     public DraggableNode(){
+        self = this;
+
         FXMLLoader fxmlLoader = new FXMLLoader(
             getClass().getResource("/layout/draggable_node.fxml")
         );
@@ -28,7 +48,75 @@ public class DraggableNode extends AnchorPane{
     }
 
     @FXML
-    private void initialize(){}
+    private void initialize(){
+        buildNodeDragHandlers();
+    }
+
+    public void buildNodeDragHandlers(){
+        tittle_bar.setOnDragDetected(
+            new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent event) {
+                    // clean references
+                    getParent().setOnDragOver(null);
+                    getParent().setOnDragDropped(null);
+
+                    // set the new ones
+                    getParent().setOnDragOver(mContextDragOver);
+                    getParent().setOnDragDropped(mContextDragDropped);
+
+                    // begin drag ops
+                    mDragOffset = new Point2D(event.getX(), event.getY());
+
+                    relocateToPoint(new Point2D(event.getSceneX(), event.getSceneY()));
+
+                    ClipboardContent content = new ClipboardContent();
+                    DragContainer container = new DragContainer();
+
+                    container.addData("type", mType.toString());
+                    content.put(DragContainer.DragNode, container);
+
+                    startDragAndDrop(TransferMode.ANY).setContent(content);
+
+                    event.consume();
+                }
+            }
+        );
+
+        // create the drag handler
+        mContextDragOver = new EventHandler <DragEvent>() {
+            //dragover to handle node dragging in the right pane view
+            @Override
+            public void handle(DragEvent event) {
+                event.acceptTransferModes(TransferMode.ANY);
+                relocateToPoint(new Point2D(event.getSceneX(), event.getSceneY()));
+
+                event.consume();
+            }
+        };
+
+        //dragdrop for node dragging
+        mContextDragDropped = new EventHandler <DragEvent> () {
+            // Clean all handlers on drop
+            @Override
+            public void handle(DragEvent event) {
+                getParent().setOnDragOver(null);
+                getParent().setOnDragDropped(null);
+
+                event.setDropCompleted(true);
+                event.consume();
+            }
+        };
+
+        //close button click
+        close_button.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                AnchorPane parent = (AnchorPane) self.getParent();
+                parent.getChildren().remove(self);
+            }
+        });
+    }
 
     public void relocateToPoint (Point2D p) {
         //relocates the object to a point that has been converted to
@@ -36,8 +124,8 @@ public class DraggableNode extends AnchorPane{
         Point2D localCoords = getParent().sceneToLocal(p);
 
         relocate (
-                (int) (localCoords.getX() - (getBoundsInLocal().getWidth() / 2)),
-                (int) (localCoords.getY() - (getBoundsInLocal().getHeight() / 2))
+            (int) (localCoords.getX() - mDragOffset.getX()),
+            (int) (localCoords.getY() - mDragOffset.getY())
         );
     }
 
@@ -81,5 +169,4 @@ public class DraggableNode extends AnchorPane{
                 break;
         }
     }
-
 }
