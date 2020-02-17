@@ -2,9 +2,9 @@ package controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Point2D;
 import javafx.scene.layout.AnchorPane;
 import model.DragIconType;
-
 import java.io.IOException;
 
 public class DragIcon extends AnchorPane {
@@ -22,12 +22,12 @@ public class DragIcon extends AnchorPane {
         try {
             fxmlLoader.load();
         } catch (IOException exception) {
-                throw new RuntimeException(exception);
-            }
+            throw new RuntimeException(exception);
         }
+    }
 
-        @FXML
-        private void initialize() {}
+    @FXML
+    private void initialize() {}
 
     public DragIconType getType() {
         return mType;
@@ -70,5 +70,15 @@ public class DragIcon extends AnchorPane {
             default:
                 break;
         }
+    }
+
+    public void relocateToPoint(Point2D p){
+        Point2D localCoords = new Point2D(getParent().sceneToLocal(p).getX(), getParent().sceneToLocal(p).getY());
+        relocate (
+                (int) (localCoords.getX() -
+                        (getBoundsInLocal().getWidth() / 2)),
+                (int) (localCoords.getY() -
+                        (getBoundsInLocal().getHeight() / 2))
+        );
     }
 }
