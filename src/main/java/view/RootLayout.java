@@ -2,10 +2,12 @@ package view;
 
 import controller.DragIcon;
 import controller.DraggableNode;
+import controller.NodeLink;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
@@ -148,11 +150,43 @@ public class RootLayout extends AnchorPane {
                     }
                 }
 
-                //AddLink drag operation
+                // AddLink drag operation
                 container = (DragContainer) event.getDragboard().getContent(DragContainer.AddLink);
 
                 if (container != null) {
-                    System.out.println(container.getData());
+                    System.out.println("AddLink drag operation");
+                    // bind the ends of our link to the nodes whose id's are stored in the drag container
+                    String sourceId = container.getValue("source");
+                    String targetId = container.getValue("target");
+
+                    if(sourceId != null && targetId != null){
+                        NodeLink link = new NodeLink();
+
+                        // add our link at the top of the rendering order so it's rendered first
+                        right_pane.getChildren().add(0, link);
+
+                        DraggableNode source = null;
+                        DraggableNode target = null;
+
+                        for(Node n : right_pane.getChildren()){
+                            // this code can change to not allow auto reference
+                           if(n.getId() == null) continue;
+                           if (n.getId().equals(sourceId)){
+                               System.out.println("Found "+sourceId);
+                               source = (DraggableNode) n;
+                           }
+                           if (n.getId().equals(targetId)){
+                               System.out.println("Found "+targetId);
+                               target = (DraggableNode) n;
+                           }
+                        }
+
+                        if(source != null && target != null){
+                            System.out.println("Bind! "+sourceId+" + "+targetId);
+                            link.bindEnds(source, target);
+                        }
+
+                    }
                 }
 
                 event.consume();

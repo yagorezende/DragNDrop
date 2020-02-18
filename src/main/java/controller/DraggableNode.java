@@ -1,6 +1,7 @@
 package controller;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -48,6 +49,8 @@ public class DraggableNode extends AnchorPane{
 
     public DraggableNode(){
         self = this;
+
+        setId(UUID.randomUUID().toString());
 
         FXMLLoader fxmlLoader = new FXMLLoader(
             getClass().getResource("/layout/draggable_node.fxml")
@@ -179,15 +182,16 @@ public class DraggableNode extends AnchorPane{
                 ClipboardContent content = new ClipboardContent();
                 DragContainer container = new DragContainer();
 
-                AnchorPane link_handle = (AnchorPane) event.getSource();
+//                AnchorPane link_handle = (AnchorPane) event.getSource();
                 // Node get from: AnchorPane > HBox > VBox > Root AnchorPane
-                DraggableNode parent = (DraggableNode) link_handle.getParent().getParent().getParent();
+//                DraggableNode parent = (DraggableNode) link_handle.getParent().getParent().getParent();
 
-                container.addData("source", parent.getType().toString());
+                container.addData("source", getId());
 
                 content.put(DragContainer.AddLink, container);
+                startDragAndDrop(TransferMode.ANY).setContent(content);
 
-                parent.startDragAndDrop(TransferMode.ANY).setContent(content);
+//                parent.startDragAndDrop(TransferMode.ANY).setContent(content);
 
                 event.consume();
             }
@@ -205,19 +209,20 @@ public class DraggableNode extends AnchorPane{
 
                 if (container == null) return;
 
-                AnchorPane link_handle = (AnchorPane) event.getSource();
-                DraggableNode parent = (DraggableNode) link_handle.getParent().getParent().getParent();
-
-                ClipboardContent content = new ClipboardContent();
-
-                container.addData("target", parent.getType().toString());
-
-                event.getDragboard().setContent(content);
-
                 //hide the draggable NodeLink and remove it from the right-hand AnchorPane's children
                 dragLink.setVisible(false);
                 right_pane.getChildren().remove(0);
 
+                AnchorPane link_handle = (AnchorPane) event.getSource();
+
+                ClipboardContent content = new ClipboardContent();
+
+//                DraggableNode parent = (DraggableNode) link_handle.getParent().getParent().getParent();
+
+                container.addData("target", getId());
+                content.put(DragContainer.AddLink, container);
+
+                event.getDragboard().setContent(content);
                 event.setDropCompleted(true);
                 event.consume();
             }
